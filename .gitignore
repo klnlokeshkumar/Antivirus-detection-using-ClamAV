@@ -1,0 +1,15 @@
+uploads/
+logs/
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+.env
+.venv/
+venv/
+*.log
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/

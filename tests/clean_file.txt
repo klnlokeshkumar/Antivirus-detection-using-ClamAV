@@ -1,0 +1,8 @@
+This is a clean test file that should not trigger any antivirus detection.
+
+It contains only safe text content for testing purposes.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+This file should be marked as "clean" by the scanner.
