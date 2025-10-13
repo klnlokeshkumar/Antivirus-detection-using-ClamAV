@@ -16,16 +16,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Include API routes
-# app.include_router(router, prefix="/api/v1")
-
-# Also include some routes at root level for convenience
 app.include_router(router)
 
 @app.get("/")
 async def root():
     return {"message": "ClamAV Scanner API is running!"}
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "service": "clamav-scanner"}

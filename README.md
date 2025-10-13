@@ -1,7 +1,5 @@
 # ClamAV Containerized Antivirus Scanner
 
-A minimalistic containerized antivirus scanning solution using ClamAV, FastAPI, and MongoDB.
-
 ## Features
 - File upload and scanning via REST API
 - Real-time malware detection using ClamAV
@@ -9,17 +7,17 @@ A minimalistic containerized antivirus scanning solution using ClamAV, FastAPI, 
 - Containerized architecture with Docker Compose
 
 ## Architecture
-- **FastAPI**: REST API backend
-- **ClamAV**: Antivirus scanning engine
-- **MongoDB**: NoSQL database for scan results
-- **Docker**: Containerization
+- FastAPI: REST API backend
+- ClamAV: Antivirus scanning engine
+- MongoDB: NoSQL database for scan results
+- Docker: Containerization
 
 ## Quick Start
 1. Make sure Docker Desktop is running
 2. Run the application:
-   ```bash
+
    docker-compose up --build
-   ```
+
 3. Access the API at `http://localhost:8000`
 4. View API docs at `http://localhost:8000/docs`
 
@@ -30,4 +28,4 @@ A minimalistic containerized antivirus scanning solution using ClamAV, FastAPI, 
 - `GET /health` - Health check
 
 ## Testing
-Upload test files (including EICAR test file) to verify malware detection.
+Upload test files to verify malware detection.

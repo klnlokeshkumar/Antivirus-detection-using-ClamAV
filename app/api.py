@@ -1,7 +1,6 @@
 import os
 import uuid
 import time
-import logging
 import aiofiles
 from datetime import datetime
 from typing import List, Optional
@@ -11,10 +10,6 @@ from fastapi.responses import JSONResponse
 from .database import get_collection
 from .models import ScanResponse, ScanRecord, ScanStatus, ScanResult, HealthResponse
 from .scanner import scanner
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -48,7 +43,6 @@ async def upload_and_scan(file: UploadFile = File(...)):
             file_size = len(content)
             await f.write(content)
         
-        logger.info(f"File uploaded: {file.filename} ({file_size} bytes) -> {file_path}")
         
         # Create initial scan record
         scan_record = ScanRecord(
@@ -63,14 +57,11 @@ async def upload_and_scan(file: UploadFile = File(...)):
         # Store in database
         collection = await get_collection()
         collection.insert_one(scan_record.dict())
-        logger.info(f"Scan record created with ID: {scan_id}")
         
         # Perform scan
-        logger.info(f"Starting ClamAV scan for {file_path}")
         start_time = time.time()
         result, threat_name = await scanner.scan_file(file_path)
         scan_time = time.time() - start_time
-        logger.info(f"Scan completed: {result}, threat: {threat_name}, time: {scan_time}s")
         
         # Update scan record
         scan_record.status = ScanStatus.COMPLETED
@@ -89,9 +80,8 @@ async def upload_and_scan(file: UploadFile = File(...)):
         try:
             if os.path.exists(file_path):
                 os.remove(file_path)
-                logger.info(f"Cleaned up file: {file_path}")
         except Exception as e:
-            logger.warning(f"Could not delete file {file_path}: {e}")
+            pass
         
         return ScanResponse(
             scan_id=scan_id,
@@ -121,10 +111,8 @@ async def upload_and_scan(file: UploadFile = File(...)):
         try:
             if os.path.exists(file_path):
                 os.remove(file_path)
-                logger.info(f"Cleaned up file after error: {file_path}")
         except Exception as cleanup_error:
-            logger.warning(f"Could not delete file {file_path}: {cleanup_error}")
-        
+            pass
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Scan failed: {error_message}"
@@ -168,35 +156,6 @@ async def get_scan(scan_id: str):
     document.pop('signature_version', None)
     
     return ScanResponse(**document)
-
-@router.get("/health", response_model=HealthResponse)
-async def health_check():
-    """Check system health"""
-    health = HealthResponse(
-        api_status="healthy",
-        clamav_status="unknown",
-        database_status="unknown"
-    )
-    
-    # Check ClamAV
-    try:
-        if await scanner.ping():
-            health.clamav_status = "healthy"
-            health.clamav_version = await scanner.get_version()
-        else:
-            health.clamav_status = "unhealthy"
-    except Exception:
-        health.clamav_status = "error"
-    
-    # Check database
-    try:
-        collection = await get_collection()
-        collection.count_documents({}, limit=1)
-        health.database_status = "healthy"
-    except Exception:
-        health.database_status = "error"
-    
-    return health
 
 @router.delete("/scans/{scan_id}")
 async def delete_scan(scan_id: str):
